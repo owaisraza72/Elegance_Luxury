@@ -22,6 +22,7 @@ import {
   Home,
   Sparkles,
   Tag,
+  LayoutDashboard,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -125,24 +126,25 @@ const Navbar = () => {
   const userMenuItems = user
     ? [
         { icon: <User size={18} />, label: "My Profile", path: "/profile" },
-        {
-          icon: <Package size={18} />,
-          label: "Orders",
-          path: "/orders",
-          badge: user.orders?.count,
-        },
-        {
-          icon: <Heart size={18} />,
-          label: "Wishlist",
-          path: "/wishlist",
-          badge: wishlistCount,
-        },
-        { icon: <Star size={18} />, label: "Reviews", path: "/reviews" },
+        ...(user.role === "user"
+          ? [
+              {
+                icon: <Package size={18} />,
+                label: "My Orders",
+                path: "/orders",
+              },
+              {
+                icon: <Heart size={18} />,
+                label: "My Favorites",
+                path: "/wishlist",
+              },
+            ]
+          : []),
         ...(user.role === "seller"
           ? [
               {
-                icon: <Crown size={18} />,
-                label: "Seller Portal",
+                icon: <LayoutDashboard size={18} />,
+                label: "Seller Dashboard",
                 path: "/seller",
                 color: "text-amber-600",
               },
@@ -152,7 +154,7 @@ const Navbar = () => {
           ? [
               {
                 icon: <Gem size={18} />,
-                label: "Admin",
+                label: "Admin Dashboard",
                 path: "/admin",
                 color: "text-violet-600",
               },
@@ -527,25 +529,6 @@ const Navbar = () => {
                     </Link>
                   ))}
                 </div>
-
-                {/* Mobile Wishlist */}
-                <Link
-                  to="/wishlist"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50"
-                >
-                  <Heart size={18} className="text-gray-400" />
-                  <span className="font-medium text-sm">Wishlist</span>
-                  {wishlistCount > 0 && (
-                    <span className="ml-auto text-xs px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full font-bold">
-                      {wishlistCount}
-                    </span>
-                  )}
-                </Link>
-
-                {/* Divider */}
-                <div className="h-px bg-gray-100 my-2" />
-
                 {/* Auth Links */}
                 {!user ? (
                   <div className="space-y-2 pt-2">

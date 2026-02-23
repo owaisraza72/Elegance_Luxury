@@ -6,6 +6,9 @@ import SellerDashboard from "../pages/seller/SellerDashboard";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminUsers from "../pages/admin/AdminUsers";
 import AdminProducts from "../pages/admin/AdminProducts";
+import AdminOrders from "../pages/admin/AdminOrders";
+import SellerProducts from "../pages/seller/SellerProducts";
+import SellerOrders from "../pages/seller/SellerOrders";
 import ProtectedRoute from "../components/ProtectedRoute";
 import ProductDetail from "../pages/user/ProductDetail";
 import EditProduct from "../pages/seller/EditProduct";
@@ -15,6 +18,7 @@ import Profile from "../pages/user/Profile";
 import Orders from "../pages/user/Orders";
 import OrderDetail from "../pages/user/OrderDetail";
 import AllProducts from "../pages/user/AllProducts";
+import Wishlist from "../pages/user/Wishlist";
 
 const AppRoutes = () => {
   return (
@@ -31,15 +35,28 @@ const AppRoutes = () => {
             <SellerDashboard />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/edit-product/:id"
-        element={
-          <ProtectedRoute role="seller">
-            <EditProduct />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route path="products" element={<SellerProducts />} />
+        <Route path="orders" element={<SellerOrders />} />
+        <Route path="edit-product/:id" element={<EditProduct />} />
+        <Route
+          path="analytics"
+          element={
+            <div className="p-10 text-2xl font-bold">
+              Seller Analytics (Coming Soon)
+            </div>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <div className="p-10 text-2xl font-bold">
+              Seller Settings (Coming Soon)
+            </div>
+          }
+        />
+      </Route>
+      {/* ... existing user routes ... */}
       <Route
         path="/cart"
         element={
@@ -94,15 +111,7 @@ const AppRoutes = () => {
       >
         <Route path="users" element={<AdminUsers />} />
         <Route path="products" element={<AdminProducts />} />
-        {/* Placeholder for future admin features */}
-        <Route
-          path="orders"
-          element={
-            <div className="p-10 text-2xl font-bold">
-              Admin Orders Management (Coming Soon)
-            </div>
-          }
-        />
+        <Route path="orders" element={<AdminOrders />} />
         <Route
           path="analytics"
           element={
@@ -128,9 +137,17 @@ const AppRoutes = () => {
       <Route
         path="/wishlist"
         element={
-          <div className="p-20 text-center text-3xl font-bold font-heading">
-            Your Wishlist (Coming Soon)
-          </div>
+          <ProtectedRoute>
+            <Wishlist />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/likes"
+        element={
+          <ProtectedRoute>
+            <Wishlist />
+          </ProtectedRoute>
         }
       />
       <Route

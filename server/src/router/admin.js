@@ -1,17 +1,9 @@
 const express = require("express");
 const { User } = require("../model/auth");
 const { Product } = require("../model/product");
-const { authMiddleware } = require("../middleware/auth");
+const { authMiddleware, adminMiddleware } = require("../middleware/auth");
 
 const adminRouter = express.Router();
-
-/* ===== ADMIN CHECK ===== */
-const adminMiddleware = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return res.status(403).send({ message: "Access denied. Admin only." });
-  }
-  next();
-};
 
 /* ================================================================ GET ALL USERS + SELLER ROUTES ================================================================ */
 adminRouter.get("/users", authMiddleware, adminMiddleware, async (req, res) => {
@@ -31,7 +23,7 @@ adminRouter.post(
   async (req, res) => {
     try {
       const user = await User.create(req.body);
-      res.status(201).send({ message: "User added", user });  
+      res.status(201).send({ message: "User added", user });
     } catch (error) {
       res.status(400).send({ message: error.message });
     }
