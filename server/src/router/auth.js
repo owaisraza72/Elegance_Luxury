@@ -3,24 +3,26 @@ const { User } = require("../model/auth");
 const authRouter = express.Router();
 const bcrypt = require("bcrypt");
 const { authMiddleware } = require("../middleware/auth");
-const { validateSignup, validateLogin } = require("../lib/utils");
+const {
+  validateSignup,
+  validateLogin,
+  validateEditProfile,
+} = require("../lib/utils");
 authRouter.post("/signup", async (req, res) => {
   try {
     validateSignup(req);
 
     const { name, email, password, gender, age, about, role } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).send({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = new User({
       name,
       email,
-      password: hashedPassword,
+      password,
       gender,
       age,
       about,
@@ -49,7 +51,7 @@ authRouter.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) throw new Error("Invalid email or password");
 
     // Password match
@@ -95,6 +97,29 @@ authRouter.get("/profile", authMiddleware, async (req, res) => {
     const userResponse = user.toObject();
     delete userResponse.password;
     res.status(200).send({ user: userResponse });
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
+authRouter.patch("/profile/edit", authMiddleware, async (req, res) => {
+  try {
+    validateEditProfile(req);
+    const loggedInUser = req.user;
+
+    Object.keys(req.body).forEach((key) => {
+      loggedInUser[key] = req.body[key];
+    });
+
+    await loggedInUser.save();
+
+    const userResponse = loggedInUser.toObject();
+    delete userResponse.password;
+
+    res.status(200).send({
+      message: `${loggedInUser.name}, your profile has been updated!`,
+      user: userResponse,
+    });
   } catch (error) {
     res.status(400).send({ message: error.message });
   }

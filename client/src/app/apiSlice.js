@@ -4,7 +4,7 @@ import { API_BASE_URL } from "../utils/constants";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: API_BASE_URL,
+    baseUrl: "http://localhost:5000" || API_BASE_URL,
     credentials: "include",
   }),
   tagTypes: ["Product", "User", "Admin", "AdminOrders", "SellerOrders"],

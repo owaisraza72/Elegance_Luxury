@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useUpdateProfileMutation } from "../../features/auth/authApi";
+import toast from "react-hot-toast";
 import {
   User,
   Mail,
@@ -26,9 +29,185 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+import {
+  X,
+  Camera,
+  Loader2,
+} from "lucide-react";
+
+const EditProfileModal = ({ isOpen, onClose, user }) => {
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    gender: user?.gender || "male",
+    age: user?.age || "",
+    about: user?.about || "",
+    photoURL: user?.photoURL || "",
+  });
+
+  const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateProfile(formData).unwrap();
+      toast.success("Profile updated successfully!");
+      onClose();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to update profile");
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+          >
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <h2 className="text-xl font-light text-gray-900">Edit Profile</h2>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <div className="space-y-4">
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all outline-none"
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Gender
+                    </label>
+                    <select
+                      value={formData.gender}
+                      onChange={(e) =>
+                        setFormData({ ...formData, gender: e.target.value })
+                      }
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all outline-none"
+                    >
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  {/* Age */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Age
+                    </label>
+                    <input
+                      type="number"
+                      min="18"
+                      max="120"
+                      value={formData.age}
+                      onChange={(e) =>
+                        setFormData({ ...formData, age: e.target.value })
+                      }
+                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all outline-none"
+                      placeholder="Age"
+                    />
+                  </div>
+                </div>
+
+                {/* About */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    About Me
+                  </label>
+                  <textarea
+                    rows="3"
+                    value={formData.about}
+                    onChange={(e) =>
+                      setFormData({ ...formData, about: e.target.value })
+                    }
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all outline-none resize-none"
+                    placeholder="Tell us about yourself..."
+                  />
+                </div>
+
+                {/* Photo URL */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Photo URL
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      value={formData.photoURL}
+                      onChange={(e) =>
+                        setFormData({ ...formData, photoURL: e.target.value })
+                      }
+                      className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all outline-none"
+                      placeholder="https://example.com/photo.jpg"
+                    />
+                    <Camera
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 px-6 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 px-6 py-2.5 bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-xl font-medium hover:shadow-lg disabled:opacity-70 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    "Save Changes"
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   if (!user) {
     return (
@@ -148,6 +327,7 @@ const Profile = () => {
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
+                    onClick={() => setIsEditModalOpen(true)}
                     className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-full border border-gray-200 flex items-center justify-center shadow-lg hover:shadow-xl"
                   >
                     <Edit2 size={16} className="text-gray-600" />
@@ -183,7 +363,7 @@ const Profile = () => {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => navigate("/profile/edit")}
+                      onClick={() => setIsEditModalOpen(true)}
                       className="px-6 py-2.5 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg font-medium hover:shadow-lg"
                     >
                       Edit Profile
@@ -433,6 +613,13 @@ const Profile = () => {
           </motion.div>
         </motion.div>
       </div>
+      
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        user={user}
+      />
     </div>
   );
 };

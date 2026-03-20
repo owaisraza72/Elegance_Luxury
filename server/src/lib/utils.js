@@ -24,7 +24,34 @@ function validateLogin(req) {
   }
 }
 
+function validateEditProfile(req) {
+  const allowedEditFields = [
+    "name",
+    "gender",
+    "age",
+    "about",
+    "skills",
+    "photoURL",
+  ];
+
+  const updates = Object.keys(req.body);
+
+  const isUpdateAllowed = updates.every((field) =>
+    allowedEditFields.includes(field),
+  );
+
+  if (!isUpdateAllowed) {
+    throw new Error("Invalid field to update!");
+  }
+
+  // individual field validation if needed
+  if (req.body.name && req.body.name.length < 3) {
+    throw new Error("Name must be more than 3 characters!");
+  }
+}
+
 module.exports = {
   validateSignup,
   validateLogin,
+  validateEditProfile,
 };

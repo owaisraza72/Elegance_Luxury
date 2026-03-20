@@ -29,6 +29,14 @@ export const authApi = apiSlice.injectEndpoints({
       query: () => "/auth/profile",
       providesTags: ["User"],
     }),
+    updateProfile: builder.mutation({
+      query: (data) => ({
+        url: "/auth/profile/edit",
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -37,4 +45,5 @@ export const {
   useSignupMutation,
   useLogoutMutation,
   useGetProfileQuery,
+  useUpdateProfileMutation,
 } = authApi;
